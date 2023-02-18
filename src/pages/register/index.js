@@ -37,7 +37,7 @@ const onRegister = async () => {
     return;
   }
 
-  const response = await onCallRegister(email, name);
+  const result = await onCallRegister(email, name);
 
   if (result.error) {
     alert("Falha ao validar e-mail");
