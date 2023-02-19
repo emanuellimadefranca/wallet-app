@@ -64,14 +64,17 @@ button {
   font-weight: bold;
   font-size: 16px;
   border-color: #5936cd;
-  border-width: 2px;
   border-style: solid;
   cursor: pointer;
 }
 
 button.small {
-  background-color: #f4f4f9;
+  border-width: 2px;
+  border-color: #5936cd;
+  border-style: solid;
+  background-color: #ffffff;
   color: #101400;
+  font-weight: bold;
   font-size: 14px;
   border-radius: 8px;
   width: 90px;
