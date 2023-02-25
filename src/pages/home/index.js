@@ -1,14 +1,58 @@
+const onLogout = () => {
+  localStorage.clear();
+  window.open("../../../index.html", "_self");
+};
+
+const onDeleteItem = async (id) => {
+  try {
+    const email = localStorage.getItem("@WalletApp:userEmail");
+    await fetch(`https://mp-wallet-app-api.herokuapp.com/finances/${id}`, {
+      method: "DELETE",
+      headers: {
+        email: email,
+      },
+    });
+    onLoadFinancesData();
+  } catch (error) {
+    alert("Error ao deletar item.");
+  }
+};
+
 const renderFinancesList = (data) => {
   const table = document.getElementById("finances-table");
-  /*
-    <tr>
-      <td>Item1</td>
-      <td>Item2</td>
-      <td class="center">Item3</td>
-      <td class="center">Item4</td>
-      <td class="right">Item5</td>
-    </tr>
-  */
+  table.innerHTML = "";
+
+  const tableHeader = document.createElement("tr");
+
+  const titleText = document.createTextNode("Titulo");
+  const titleElement = document.createElement("th");
+  titleElement.appendChild(titleText);
+  tableHeader.appendChild(titleElement);
+
+  const categoryText = document.createTextNode("Categoria");
+  const categoryElement = document.createElement("th");
+  categoryElement.appendChild(categoryText);
+  tableHeader.appendChild(categoryElement);
+
+  const dataText = document.createTextNode("Data");
+  const dataElement = document.createElement("th");
+  dataElement.appendChild(dataText);
+  tableHeader.appendChild(dataElement);
+
+  const valueText = document.createTextNode("Valor");
+  const valueElement = document.createElement("th");
+  valueElement.className = "center";
+  valueElement.appendChild(valueText);
+  tableHeader.appendChild(valueElement);
+
+  const actionText = document.createTextNode("Ação");
+  const actionElement = document.createElement("th");
+  actionElement.className = "right";
+  actionElement.appendChild(actionText);
+  tableHeader.appendChild(actionElement);
+
+  table.appendChild(tableHeader);
+
   data.map((item) => {
     const tableRow = document.createElement("tr");
     tableRow.className = "mt smaller";
@@ -45,6 +89,8 @@ const renderFinancesList = (data) => {
 
     // delete
     const deleteTd = document.createElement("td");
+    deleteTd.style.cursor = "pointer";
+    deleteTd.onclick = () => onDeleteItem(item.id);
     deleteTd.className = "right";
     const deleteText = document.createTextNode("Deletar");
     deleteTd.appendChild(deleteText);
@@ -67,14 +113,29 @@ const renderFinanceElements = (data) => {
 
   // render total items
   const financeCard1 = document.getElementById("finance-card-1");
+  financeCard1.innerHTML = "";
+
+  const totalSubText = document.createTextNode("Total de lançamentos");
+  const totalSubTextElement = document.createElement("h3");
+  totalSubTextElement.appendChild(totalSubText);
+  financeCard1.appendChild(totalSubTextElement);
+
   const totalText = document.createTextNode(totalItems);
   const totalElement = document.createElement("h1");
+  totalElement.id = "total-element";
   totalElement.className = "mt smaller";
   totalElement.appendChild(totalText);
   financeCard1.appendChild(totalElement);
 
   // render renevue
   const financeCard2 = document.getElementById("finance-card-2");
+  financeCard2.innerHTML = "";
+
+  const renevueSubText = document.createTextNode("Receitas");
+  const renevueSubTextElement = document.createElement("h3");
+  renevueSubTextElement.appendChild(renevueSubText);
+  financeCard2.appendChild(renevueSubTextElement);
+
   const revenueText = document.createTextNode(
     new Intl.NumberFormat("pt-BR", {
       style: "currency",
@@ -82,12 +143,20 @@ const renderFinanceElements = (data) => {
     }).format(revenues)
   );
   const revenueTextElement = document.createElement("h1");
+  renevueTextElement.id = "renevue-element";
   renevueTextElement.className = "mt smaller";
   revenueTextElement.appendChild(revenueText);
   financeCard2.appendChild(revenueTextElement);
 
   // render expenses
   const financeCard3 = document.getElementById("finance-card-3");
+  financeCard3.innerHTML = "";
+
+  const expensesSubText = document.createTextNode("Despesas");
+  const expensesSubTextElement = document.createElement("h3");
+  expensesSubTextElement.appendChild(expensesSubText);
+  financeCard3.appendChild(expensesSubTextElement);
+
   const expensesText = document.createTextNode(
     new Intl.NumberFormat("pt-BR", {
       style: "currency",
@@ -95,12 +164,20 @@ const renderFinanceElements = (data) => {
     }).format(expenses)
   );
   const expensesTextElement = document.createElement("h1");
+  expensesTextElement.id = "expenses-element";
   expensesTextElement.className = "mt smaller";
   expensesTextElement.appendChild(expensesText);
   financeCard3.appendChild(expensesTextElement);
 
-  // render total
+  // render balance
   const financeCard4 = document.getElementById("finance-card-4");
+  financeCard4.innerHTML = "";
+
+  const balanceSubText = document.createTextNode("Balanço");
+  const balanceSubTextElement = document.createElement("h3");
+  balanceSubTextElement.appendChild(balanceSubText);
+  financeCard4.appendChild(balanceSubTextElement);
+
   const balanceText = document.createTextNode(
     new Intl.NumberFormat("pt-BR", {
       style: "currency",
@@ -108,6 +185,7 @@ const renderFinanceElements = (data) => {
     }).format(totalValue)
   );
   const balanceTextElement = document.createElement("h1");
+  balanceTextElement.id = "balance-element";
   balanceTextElement.className = "mt smaller";
   balanceTextElement.style.color = "#5936CD";
   balanceTextElement.appendChild(balanceText);
@@ -116,8 +194,8 @@ const renderFinanceElements = (data) => {
 
 const onLoadFinancesData = async () => {
   try {
-    const date = "2023-02-18";
-    const email = localStorage.getItem("WalletApp:userEmail");
+    const dateInputValue = document.getElementById("select-date").value;
+    const email = localStorage.getItem("@WalletApp:userEmail");
     const result = await fetch(
       `https://mp-wallet-app-api.herokuapp.com/finances?date=${date}`,
       {
@@ -151,6 +229,8 @@ const onLoadUserInfo = () => {
 
   // add logout link
   const logoutElement = document.createElement("a");
+  logoutElement.onClick = () => onLogout();
+  logoutElement.style.cursor = "pointer";
   const logoutText = document.createTextNode("sair");
   logoutElement.appendChild(logoutText);
   navbarUserInfo.appendChild(logoutElement);
@@ -162,7 +242,104 @@ const onLoadUserInfo = () => {
   navbarUserAvatar.appendChild(nameElement);
 };
 
+const onLoadCategories = async () => {
+  try {
+    const categoriesSelect = document.getElementById("input-category");
+    const response = await fetch("https://mp-wallet-app-api.herokuapp.com");
+    const categoriesResult = await response.json();
+    categoriesResult.map((category) => {
+      const option = document.createElement("option");
+      const categoryText = document.createTextNode(category.name);
+      option.id = `category_${category.id}`;
+      option.value = category.id;
+      option.appendChild(categoryText);
+      categoriesSelect.append(option);
+    });
+  } catch (error) {
+    alert("Erro ao carregar categorias");
+  }
+};
+
+const onOpenModal = () => {
+  const modal = document.getElementById("modal");
+  modal.style.display = "flex";
+};
+
+const onCloseModal = () => {
+  const modal = document.getElementById("modal");
+  modal.style.display = "none";
+};
+
+const onCallAddFinance = async (data) => {
+  try {
+    const email = localStorage.getItem("@WalletApp:userEmail");
+
+    const response = await fetch(
+      "https://mp-wallet-app-api.herokuapp.com/finances",
+      {
+        method: "POST",
+        mode: "cors",
+        cache: "no-cache",
+        credentials: "same-origin",
+        headers: {
+          "Content-Type": "application/json",
+          email: email,
+        },
+        body: JSON.stringify(data),
+      }
+    );
+
+    const user = await response.json();
+    return user;
+  } catch (error) {
+    return { error };
+  }
+};
+
+const onCreateFinanceRelease = async (target) => {
+  try {
+    const title = target[0].value;
+    const value = Number(target[1].value);
+    const date = target[2].value;
+    const category = Number(target[3].value);
+    const result = await onCallAddFinance({
+      title,
+      value,
+      date,
+      category_id: category,
+    });
+
+    if (result.error) {
+      alert("Error ao adicionar novo dado financeiro.");
+      return;
+    }
+    onCloseModal();
+    onLoadFinancesData();
+  } catch (error) {
+    alert("Erro ao adicionar novo dado financeiro.");
+  }
+};
+
+const setInitialDate = () => {
+  const dateInput = document.getElementById("select-date");
+  const nowDate = new Date().toISOString().split("T")[0];
+  dateInput.value = nowDate;
+  dateInput.addEventListener;
+  "change",
+    () => {
+      onLoadFinancesData();
+    };
+};
+
 window.onload = () => {
+  setInitialDate();
   onLoadUserInfo();
   onLoadFinancesData();
+  onLoadCategories();
+
+  const form = document.getElementById("form-finance-release");
+  form.onsubmit = (event) => {
+    event.preventDefault();
+    onCreateFinanceRelease(event.target);
+  };
 };
